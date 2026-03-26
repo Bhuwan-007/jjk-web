@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import ShrineBackground from "./ShrineBackground";
 
@@ -100,6 +100,8 @@ export default function LoginPage() {
         <ShrineBackground />
       </div>
 
+      <CursedTrail />
+
       {/* Layer 1: The Void Holes (Rendered underneath everything so things float over them) */}
       {scars.map((scar) => (
         <DismantleScar key={`scar-${scar.id}`} scar={scar} />
@@ -119,9 +121,7 @@ export default function LoginPage() {
       {/* UI Overlay: The Login Form */}
       <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
         
-        {/* 1. bg-transparent makes the box invisible.
-          2. onPointerDown & onPointerUp stop clicks inside the box from triggering Slashes!
-        */}
+        {/* THE LOGIN FORM (Now perfectly centered alone) */}
         <div 
           className="p-8 w-full max-w-md bg-transparent border border-red-900/50 rounded-xl pointer-events-auto shadow-[0_0_50px_rgba(220,0,0,0.15)] flex flex-col items-center backdrop-blur-[2px]"
           onPointerDown={(e) => e.stopPropagation()}
@@ -134,37 +134,62 @@ export default function LoginPage() {
             Authenticate Cursed Energy
           </p>
 
-          {/* The Actual Form Inputs */}
           <form className="w-full space-y-6" onSubmit={(e) => e.preventDefault()}>
-            
             <div className="space-y-2">
               <label className="text-red-500 text-xs tracking-widest uppercase ml-1">Sorcerer ID (Email)</label>
               <input 
                 type="email" 
                 placeholder="Enter your email"
-                className="w-full bg-black/40 border border-red-950 text-red-200 px-4 py-3 rounded-md focus:outline-none focus:border-red-600 focus:shadow-[0_0_15px_rgba(200,0,0,0.4)] transition-all placeholder-red-950/50"
+                className="w-full bg-black/80 border border-red-950 text-red-200 px-4 py-3 rounded-md focus:outline-none focus:border-red-600 focus:shadow-[0_0_15px_rgba(200,0,0,0.4)] transition-all placeholder-red-950/50"
               />
             </div>
-
             <div className="space-y-2">
               <label className="text-red-500 text-xs tracking-widest uppercase ml-1">Cursed Seal (Password)</label>
               <input 
                 type="password" 
                 placeholder="••••••••"
-                className="w-full bg-black/40 border border-red-950 text-red-200 px-4 py-3 rounded-md focus:outline-none focus:border-red-600 focus:shadow-[0_0_15px_rgba(200,0,0,0.4)] transition-all placeholder-red-950/50"
+                className="w-full bg-black/80 border border-red-950 text-red-200 px-4 py-3 rounded-md focus:outline-none focus:border-red-600 focus:shadow-[0_0_15px_rgba(200,0,0,0.4)] transition-all placeholder-red-950/50"
               />
             </div>
-
             <button 
               type="submit"
               className="w-full mt-4 py-4 px-8 bg-red-950/80 hover:bg-red-800 text-red-200 font-bold tracking-widest transition-all duration-300 border border-red-800 hover:shadow-[0_0_25px_rgba(220,0,0,0.6)] rounded-md"
             >
-              MANIFEST DOMAIN
+              Enter the World
             </button>
           </form>
+        </div>
 
+        {/* The Bottom Navigation Footer */}
+        <div className="absolute bottom-8 left-0 w-full px-12 grid grid-cols-3 items-end pointer-events-none">
+          <div className="flex justify-start pointer-events-auto">
+            <button 
+              className="text-red-600/60 hover:text-red-400 text-xs tracking-[0.3em] font-bold uppercase transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              About Project
+            </button>
+          </div>
+          <div className="flex justify-center pointer-events-auto">
+            <button 
+              className="text-red-500 hover:text-white text-sm tracking-[0.4em] font-bold uppercase transition-all duration-300 border-b border-red-900/0 hover:border-red-500 pb-1 hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              Register Sorcerer
+            </button>
+          </div>
+          <div className="flex justify-end pointer-events-auto">
+            <button 
+              className="text-red-600/60 hover:text-red-400 text-xs tracking-[0.3em] font-bold uppercase transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              Developer Profile
+            </button>
+          </div>
         </div>
       </div>
+        
+      
     </div>
   );
 }
@@ -254,4 +279,78 @@ function ScreenShard({ shard }) {
       />
     </div>
   );
+}
+// ----------------------------------------------------------------------
+// 4. NEW: High-Performance Cursed Energy Mouse Trail
+// ----------------------------------------------------------------------
+function CursedTrail() {
+  const { useEffect } = require("react"); // Make sure useEffect is imported at the top of your file if it isn't already!
+
+  useEffect(() => {
+    // Start the trail in the center of the screen
+    const coords = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const circles = [];
+    const numCircles = 20; // Length of the tail
+
+    // Create the HTML elements for the tail dynamically
+    for (let i = 0; i < numCircles; i++) {
+      const el = document.createElement("div");
+      
+      // Styling the cursed energy aesthetic
+      el.className = "pointer-events-none fixed top-0 left-0 z-50  bg-black";
+      
+      // The tail tapers off: starts at 14px, shrinks down to 2px
+      const size = 14 - (i * 0.6); 
+      el.style.width = `${size}px`;
+      el.style.height = `${size}px`;
+      
+      // The crimson aura fades out towards the end of the tail
+      el.style.boxShadow = `0 0 ${12 - i * 0.4}px 2px rgba(220, 0, 0, ${1 - i/numCircles})`;
+      
+      // The very tip of the cursor gets a tiny white core
+      if (i < 2) el.style.border = "1px solid rgba(255, 255, 255, 0.4)";
+
+      document.body.appendChild(el);
+      circles.push({ el, x: coords.x, y: coords.y });
+    }
+
+    // Update coordinates strictly on mouse movement
+    const onMouseMove = (e) => {
+      coords.x = e.clientX;
+      coords.y = e.clientY;
+    };
+    window.addEventListener("mousemove", onMouseMove);
+
+    // High-performance animation loop (Bypasses React entirely)
+    let animationFrame;
+    const animate = () => {
+      let x = coords.x;
+      let y = coords.y;
+
+      circles.forEach((circle, index) => {
+        // Move the physical element
+        circle.el.style.transform = `translate(calc(${circle.x}px - 50%), calc(${circle.y}px - 50%))`;
+
+        // The physics: Each circle chases the one in front of it with a slight delay (0.3)
+        circle.x += (x - circle.x) * 0.3;
+        circle.y += (y - circle.y) * 0.3;
+
+        // Pass the coordinates down the chain
+        x = circle.x;
+        y = circle.y;
+      });
+
+      animationFrame = requestAnimationFrame(animate);
+    };
+    animate();
+
+    // Cleanup when leaving the page
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      cancelAnimationFrame(animationFrame);
+      circles.forEach(circle => circle.el.remove());
+    };
+  }, []);
+
+  return null; // This component doesn't render standard HTML, it manipulates the DOM directly!
 }

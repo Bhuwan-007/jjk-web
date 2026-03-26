@@ -1,49 +1,60 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Environment, Float, OrbitControls, useGLTF } from "@react-three/drei";
+import { Environment, Float, OrbitControls, useGLTF, Sparkles } from "@react-three/drei";
+import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 
-// 1. The Component that actually loads your 3D file
 function MalevolentShrine() {
-  // Make sure this string matches exactly what you named the file in your public folder!
   const { scene } = useGLTF("/scene.gltf"); 
 
   return (
-    <Float speed={0} rotationIntensity={0} floatIntensity={0}>
-      {/* This is your model! 
-        You might need to change the 'scale' if it spawns too big or too small, 
-        and the 'position' [x, y, z] to center it.
-      */}
+    // Reduced the floating so it feels heavier and more grounded
+    <Float speed={1} rotationIntensity={0.05} floatIntensity={0.1}>
       <primitive 
         object={scene} 
-        scale={30} 
-        position={[0, -2, -2]} 
+        scale={29} 
+        position={[0, -1.75, -2]} 
         rotation={[0.,Math.PI, 0]}
       />
     </Float>
   );
 }
 
-// 2. The Main Canvas setup
 export default function ShrineBackground() {
   return (
     <Canvas camera={{ position: [0, 2, 14], fov: 50 }}>
-      {/* Heavy Blood Red Lighting */}
-      <ambientLight intensity={0.4} color="#ff0000" />
-      <directionalLight position={[5, 10, -5]} intensity={3} color="#ff3333" />
-      <pointLight position={[0, -2, 4]} intensity={5} color="#cc0000" />
+      {/* 1. Base Lighting */}
+      <ambientLight intensity={0.2} color="#ff0000" />
+      <directionalLight position={[5, 10, -5]} intensity={2} color="#ff3333" />
+      <pointLight position={[0, -2, 4]} intensity={8} color="#cc0000" />
       
-      {/* The dark atmospheric fog blending into the black background */}
-      <fog attach="fog" args={["#050000", 8, 30]} />
+      {/* 2. Cursed Energy Embers filling the empty space */}
+      {/* Red ambient dust */}
+      <Sparkles count={300} scale={25} size={3} speed={0.4} opacity={0.4} color="#ff0000" />
+      {/* Bright glowing sparks */}
+      <Sparkles count={100} scale={30} size={5} speed={0.8} opacity={0.8} color="#ffffff" />
       
-      {/* Loads the shrine component we built above */}
+      {/* 3. The Fog */}
+      <fog attach="fog" args={["#050000", 8, 25]} />
+      
       <MalevolentShrine />
+
+      {/* 4. Cinematic Post-Processing */}
+      <EffectComposer>
+        {/* Bloom makes the red lights and white sparks actually glow */}
+        <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} intensity={1.5} />
+        {/* Vignette adds heavy shadows to the corners of the screen */}
+        <Vignette eskil={false} offset={0.1} darkness={1.2} />
+      </EffectComposer>
       
       <OrbitControls 
-        enableZoom={false} 
-        // Limits how far up and down the user can drag the camera
-        maxPolarAngle={Math.PI / 1.5} 
-        minPolarAngle={Math.PI / 3}
+        enableZoom={true} 
+        minDistance={5.5}
+        maxDistance={22}
+        zoomSpeed={0.6}
+        maxPolarAngle={Math.PI / 1.9} 
+        minPolarAngle={Math.PI / 2.2}
+        target={[0, -1.5, -1]}
       />
       <Environment preset="night" />
     </Canvas>
